@@ -21,6 +21,8 @@ class CapitelText:
         self.remove_empty_lines()
         self.convert_to_dictionary()
         self.whole_title = self.get_capitel_title()
+
+        self.get_all_verses_with_verse_number()
         #print(self.text)
 
     def get_text_content_new(self):
@@ -84,6 +86,9 @@ class CapitelText:
 
     def starts_with_numbers(self, text):
         return text.isnumeric()
+
+    def get_all_verses_with_verse_number(self):
+        return  re.findall(r"\d\d*\s.*", self.text)
 
     # TODO implement method
     def convert_to_dictionary(self):
