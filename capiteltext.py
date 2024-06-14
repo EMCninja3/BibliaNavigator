@@ -17,6 +17,7 @@ class CapitelText:
         # for i in self.text:
         #     print(i.string)
         self.get_text_content_new()
+        self.convert_to_swiss_german_letters()
         self.text = self.remove_hashtag_comments(self.text)
         self.put_brackets_in_same_line()
         self.remove_double_lines()
@@ -73,8 +74,8 @@ class CapitelText:
     def set_book_meta_data(self):
         pass
 
-    def convert_to_swiss_german_letters(self, text):
-        return text.replace('ß', 'ss')
+    def convert_to_swiss_german_letters(self):
+        self.text = self.text.replace('ß', 'ss')
 
     def remove_hashtag_comments(self, text):
         return re.sub("#.*", "", text)
