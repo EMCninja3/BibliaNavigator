@@ -21,11 +21,12 @@ url7 = "https://www.bible.com/de/bible/149/2SA.12.RVR1960"
 urls = [url1, url2, url3, url4, url5, url6, url7]
 
 capitel = None
+# for url in urls[5:6]:
 for url in urls:
     webpage = requests.get(url, 'html.parser')
     capitel = CapitelText(webpage)
     print(capitel.whole_title)
-    print(capitel.text)
+    #print(capitel.text)
 # print(webpage.content)
 ### response = http.request('GET', url)
 #soup = BeautifulSoup(webpage.content, features="html.parser")

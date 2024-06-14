@@ -12,18 +12,19 @@ class CapitelText:
         self.text = ""
         self.dictionary = dict()
         self.soup = BeautifulSoup(self.webpage.content, 'html.parser')
-        # print(self.soup)
+        #print(self.soup)
         self.text = self.soup.findAll("span")
+        # for i in self.text:
+        #     print(i.string)
         self.get_text_content_new()
         self.text = self.remove_hashtag_comments(self.text)
         self.put_brackets_in_same_line()
         self.remove_double_lines()
         self.remove_empty_lines()
-        self.convert_to_dictionary()
         self.whole_title = self.get_capitel_title()
-
-        self.get_all_verses_with_verse_number()
-        #print(self.text)
+        self.set_dictionary()
+        # print(self.text)
+        print(self.dictionary)
 
     def get_text_content_new(self):
         text = ""
@@ -39,9 +40,7 @@ class CapitelText:
                 text += ">\n"
             else:
                 if line.string != None:
-                    if line.string not in lastLine:
-                        text += line.string + "\n"
-                        lastLine = ""
+                    text += line.string + "\n"
         self.text = text
 
     def put_brackets_in_same_line(self):
@@ -70,8 +69,8 @@ class CapitelText:
         text = self.soup.find_all("h1")
         return text[0].string
 
-    #TODO implement get capitel title, book number and book title
-    def get_book_meta_data(self):
+    # TODO implement get capitel title, book number and book title
+    def set_book_meta_data(self):
         pass
 
     def convert_to_swiss_german_letters(self, text):
@@ -80,33 +79,29 @@ class CapitelText:
     def remove_hashtag_comments(self, text):
         return re.sub("#.*", "", text)
 
-    # TODO is it needed ??? removing text explanations
-    def remove_subtitle(self):
-        pass
-
     def starts_with_numbers(self, text):
         return text.isnumeric()
 
     def get_all_verses_with_verse_number(self):
-        return  re.findall(r"\d\d*\s.*", self.text)
+        return re.findall(r"\d{1,2}?\n{1}.*", self.text)
 
-    # TODO implement method
-    def convert_to_dictionary(self):
-        text = self.text.split("\n")
-        while "" in text:
-            text.remove("")
+
+    def get_number_from_verse(self, text):
+        return re.search(r"\d\d*", text)
+
+
+    def get_text_from_verse(self, text, number):
+        return text[len(number):]
+
+    def set_dictionary(self):
+        verses = self.get_all_verses_with_verse_number()
         dictionary = dict()
-        number = -1
-        content = ""
-        for line in text:
-            if self.starts_with_numbers(line):
-                number = int(line) - 1
-                if content != "":
-                    dictionary[number] = content
-                    content = ""
-            else:
-                content += line
-        dictionary[number] = content
+
+        for verse in verses:
+            #print(verse)
+            number = self.get_number_from_verse(verse).group()
+            text = self.get_text_from_verse(verse, number).replace('\n', '')
+            dictionary[number] = text
         self.dictionary = dictionary
 
     def remove_double_lines(self):
