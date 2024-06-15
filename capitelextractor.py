@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import re
 
 
-class CapitelText:
+class CapitelExtractor:
     def __init__(self, webpage):
         self.webpage = webpage
         self.whole_title = ""

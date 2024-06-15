@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 from PIL import Image, ImageTk
-from capiteltext import CapitelText
+from capitelextractor import CapitelExtractor
 
 image = Image.open('python_img.jpeg')
 image = image.resize((500, 300))
@@ -24,7 +24,7 @@ capitel = None
 # for url in urls[5:6]:
 for url in urls:
     webpage = requests.get(url, 'html.parser')
-    capitel = CapitelText(webpage)
+    capitel = CapitelExtractor(webpage)
     print(capitel.whole_title)
     #print(capitel.text)
 # print(webpage.content)
