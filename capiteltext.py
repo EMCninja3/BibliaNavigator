@@ -46,6 +46,16 @@ class CapitelText:
                 to_delete.append(actual_delete)
                 actual_delete = ""
                 text += ">\n"
+            elif line['class'] == ['ChapterContent_heading__xBDcs']:
+                text += "["
+                for i in line:
+                    if i.string != None:
+                        actual_delete += i.string + "\n"
+                        #lastLine += i.string + "\n"
+                        text += i.string
+                to_delete.append(actual_delete)
+                actual_delete = ""
+                text += "]\n"
             else:
                 if line.string != None:
                     text += line.string + "\n"
@@ -61,12 +71,14 @@ class CapitelText:
             self.text = re.sub(r"\n\(\s*.*\s.*\s\)", " " + text, self.text)
 
     def put_angle_brackets_in_same_line(self):
-        while re.search(r"\n\s\<.*\>\n", self.text) != None:
-            match = re.search(r"\n\s\<.*\>\n", self.text)
-            text = match.group()
-            text = text.replace("\n", "")
-            self.text = re.sub(r"\n\s\<.*\>\n", " " + text, self.text)
+        notes = re.findall(r"\n\s\<.*\>\n", self.text)
+        if notes != None:
+            for note in notes:
+                text = note.replace("\n", "")
+                self.text = self.text.replace(note, text)
 
+    # def mark_all_subtitles(self):
+    #     subtitle =
     def get_capitel_title(self):
         text = self.soup.find_all("h1")
         return text[0].string
