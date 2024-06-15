@@ -12,6 +12,7 @@ class CapitelText:
         self.text = ""
         self.dictionary = dict()
         self.soup = BeautifulSoup(self.webpage.content, 'html.parser')
+        # self.soup = BeautifulSoup(self.webpage.content, 'html5lib')
         #print(self.soup)
         self.text = self.soup.findAll("span")
         # for i in self.text:
@@ -20,6 +21,7 @@ class CapitelText:
         self.convert_to_swiss_german_letters()
         self.text = self.remove_hashtag_comments(self.text)
         self.put_brackets_in_same_line()
+        self.put_angle_brackets_in_same_line()
         self.remove_double_lines()
         self.remove_empty_lines()
         self.whole_title = self.get_capitel_title()
@@ -29,42 +31,41 @@ class CapitelText:
 
     def get_text_content_new(self):
         text = ""
-        lastLine = ""
+        #lastLine = ""
+        to_delete = []
+        actual_delete = ""
         for line in self.text:
             # ChapterContent_body__O3qjr
             if line['class'] == ['ChapterContent_body__O3qjr']:
                 text += "<"
                 for i in line:
                     if i.string != None:
-                        lastLine += i.string + "\n"
+                        actual_delete += i.string + "\n"
+                        #lastLine += i.string + "\n"
                         text += i.string
+                to_delete.append(actual_delete)
+                actual_delete = ""
                 text += ">\n"
             else:
                 if line.string != None:
                     text += line.string + "\n"
+        for i in to_delete:
+            text = text.replace(i, '')
         self.text = text
 
     def put_brackets_in_same_line(self):
-        while re.search(r"\(\s*.*\s.*\s\)", self.text) != None:
-            match = re.search(r"\(\s*.*\s.*\s\)", self.text)
+        while re.search(r"\n\(\s*.*\s.*\s\)", self.text) != None:
+            match = re.search(r"\n\(\s*.*\s.*\s\)", self.text)
             text = match.group()
             text = text.replace("\n", "")
-            self.text = re.sub(r"\(\s*.*\s.*\s\)", text, self.text)
+            self.text = re.sub(r"\n\(\s*.*\s.*\s\)", " " + text, self.text)
 
-    def get_text_content(self, content):
-        text = ""
-        for i in content:
-            if i.string is not None and i.string != ' ':
-                if len(text) > 0:
-                    if text[-1] == '#':
-                        text += i.string + "#\n"
-                    elif text[-1] == '\n':
-                        text += i.string
-                    else:
-                        text += "\n" + i.string
-                else:
-                    text += i.string
-        return text
+    def put_angle_brackets_in_same_line(self):
+        while re.search(r"\n\s\<.*\>\n", self.text) != None:
+            match = re.search(r"\n\s\<.*\>\n", self.text)
+            text = match.group()
+            text = text.replace("\n", "")
+            self.text = re.sub(r"\n\s\<.*\>\n", " " + text, self.text)
 
     def get_capitel_title(self):
         text = self.soup.find_all("h1")
