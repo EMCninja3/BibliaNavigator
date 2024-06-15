@@ -27,7 +27,7 @@ class CapitelText:
         self.whole_title = self.get_capitel_title()
         self.set_dictionary()
         # print(self.text)
-        print(self.dictionary)
+        #print(self.dictionary)
 
     def get_text_content_new(self):
         text = ""
@@ -64,11 +64,13 @@ class CapitelText:
         self.text = text
 
     def put_brackets_in_same_line(self):
-        while re.search(r"\n\(\s*.*\s.*\s\)", self.text) != None:
-            match = re.search(r"\n\(\s*.*\s.*\s\)", self.text)
+        while re.search(r"\n\[\(\]\s.*\s\[\)\]", self.text) != None:
+            match = re.search(r"\n\[\(\]\s.*\s\[\)\]", self.text)
             text = match.group()
             text = text.replace("\n", "")
-            self.text = re.sub(r"\n\(\s*.*\s.*\s\)", " " + text, self.text)
+            text = text.replace("[", "")
+            text = text.replace("]", "")
+            self.text = re.sub(r"\n\[\(\]\s.*\s\[\)\]", " " + text, self.text)
 
     def put_angle_brackets_in_same_line(self):
         notes = re.findall(r"\n\s\<.*\>\n", self.text)
