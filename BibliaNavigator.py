@@ -22,10 +22,19 @@ urls = [url1, url2, url3, url4, url5, url6, url7]
 
 capitel = None
 # for url in urls[5:6]:
-for url in urls:
+for url in urls[5:6]:
     webpage = requests.get(url, 'html.parser')
     capitel = CapitelExtractor(webpage)
     print(capitel.whole_title)
+verses = capitel.all_verses
+
+for verse in verses:
+    print(verse.title + verse.number + verse.content)
+# for i in range(1, 100):
+#     webpage = requests.get(capitel.next_chapter_link, 'html.parser')
+#     capitel = CapitelExtractor(webpage)
+#     print(capitel.whole_title)
+
     #print(capitel.text)
 # print(webpage.content)
 ### response = http.request('GET', url)

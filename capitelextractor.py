@@ -1,15 +1,21 @@
+import requests
 from bs4 import BeautifulSoup
 import re
+
+from verse import Verse
 
 
 class CapitelExtractor:
     def __init__(self, webpage):
+        self.domain = "https://www.bible.com"
         self.webpage = webpage
         self.whole_title = ""
         self.book_title = ""
         self.book_number = 0
         self.capitel_number = 0
+        self.next_chapter_link = ""
         self.text = ""
+        self.all_verses = []
         self.dictionary = dict()
         self.soup = BeautifulSoup(self.webpage.content, 'html.parser')
         # self.soup = BeautifulSoup(self.webpage.content, 'html5lib')
@@ -26,6 +32,8 @@ class CapitelExtractor:
         self.remove_empty_lines()
         self.whole_title = self.get_capitel_title()
         self.set_dictionary()
+        self.set_all_verses_from_text()
+        self.set_next_chapter_link()
         # print(self.text)
         #print(self.dictionary)
 
@@ -62,6 +70,36 @@ class CapitelExtractor:
         for i in to_delete:
             text = text.replace(i, '')
         self.text = text
+
+    # TODO implement link to next capitel
+    def set_next_chapter_link(self):
+        links = self.soup.find_all("a")
+        text = ""
+        for link in links:
+            if link.get('href') != None:
+                text += link.get('href') + "\n"
+        # print(text)
+        link = re.findall(r"/de/bible/.*", text)
+        self.next_chapter_link = self.domain + link[-1]
+
+    def set_all_verses_from_text(self):
+        pattern = r"(?P<title>\[.*\].*\n)?(?P<number>\d\d?)(?P<content>\n.*)"
+        text = self.text
+        compiled = re.compile(pattern)
+        verses = []
+        while compiled.search(text):
+            match = compiled.search(text)
+            title = match.group('title')
+            if title == None:
+                title = ""
+            number = match.group('number')
+            content = match.group('content')
+            text = text.replace(title + number + content, '')
+            verse = Verse(number, content, title)
+            verses.append(verse)
+        self.all_verses = verses
+
+
 
     def put_brackets_in_same_line(self):
         while re.search(r"\n\[\(\]\s.*\s\[\)\]", self.text) != None:
