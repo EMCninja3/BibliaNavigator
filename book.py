@@ -1,5 +1,13 @@
-class Book:
-    def __init__(self, booknumber, bookname, capitels):
-        self.booknumber = booknumber
-        self.bookname = bookname
-        self.capitels = capitels
+from sqlobject import SQLObject, IntCol, MultipleJoin, StringCol
+
+
+class Book(SQLObject):
+    """
+    class Book(SQLObject):
+    booknumber = IntCol(default=None)
+    bookname = StringCol()
+    chapters = MultipleJoin('Chapter')
+    """
+    booknumber = IntCol(default=None)
+    bookname = StringCol()
+    chapters = MultipleJoin('Chapter')

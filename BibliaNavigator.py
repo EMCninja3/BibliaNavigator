@@ -1,15 +1,17 @@
 import tkinter as tk
-from bs4 import BeautifulSoup
-# import urllib3
 import requests
-import re
 from PIL import Image, ImageTk
 from capitelextractor import CapitelExtractor
+from database import Database
 
-image = Image.open('python_img.jpeg')
-image = image.resize((500, 300))
+db = Database()
+db.initialize()
 
-# http = urllib3.PoolManager()
+
+
+
+
+
 
 url1 = 'https://www.bible.com/de/bible/73/GEN.1.HFA'
 url2 = "https://www.bible.com/de/bible/58/GEN.1.ELB71"
@@ -21,8 +23,9 @@ url7 = "https://www.bible.com/de/bible/149/2SA.12.RVR1960"
 urls = [url1, url2, url3, url4, url5, url6, url7]
 
 capitel = None
-# for url in urls[5:6]:
-for url in urls[5:6]:
+# for url in urls[0:1]:
+#for url in urls[5:6]:
+for url in urls:
     webpage = requests.get(url, 'html.parser')
     capitel = CapitelExtractor(webpage)
     print(capitel.whole_title)

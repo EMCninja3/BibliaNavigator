@@ -2,21 +2,28 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
+from book import Book
+from chapter import Chapter
+from database import Database
 from verse import Verse
 
 
 class CapitelExtractor:
+    book = None
+    chapter = None
+
     def __init__(self, webpage):
         self.domain = "https://www.bible.com"
         self.webpage = webpage
         self.whole_title = ""
         self.book_title = ""
         self.book_number = 0
-        self.capitel_number = 0
+        self.chapter_number = 0
         self.next_chapter_link = ""
         self.text = ""
         self.all_verses = []
         self.dictionary = dict()
+        self.chapter = 0
         self.soup = BeautifulSoup(self.webpage.content, 'html.parser')
         # self.soup = BeautifulSoup(self.webpage.content, 'html5lib')
         #print(self.soup)
@@ -30,12 +37,33 @@ class CapitelExtractor:
         self.put_angle_brackets_in_same_line()
         self.remove_double_lines()
         self.remove_empty_lines()
-        self.whole_title = self.get_capitel_title()
+        self.set_capitel_title()
         self.set_dictionary()
+        self.set_book_meta_data()
+        #self.db = Database()
+        self.create_book_and_chapter()
+
         self.set_all_verses_from_text()
+
         self.set_next_chapter_link()
         # print(self.text)
         #print(self.dictionary)
+
+    def book_exists(self, book_title):
+        return Book.select(Book.q.bookname == book_title)
+
+    def create_book_and_chapter(self):
+        self.book = self.book_exists(self.book_title)
+        print(f"book count  = {self.book.count()}")
+        if self.book.count() == 0:
+            self.book = Book(booknumber=self.book_number, bookname= self.book_title)
+            self.chapter = Chapter(number=int(self.chapter_number), book=self.book)
+            #self.book.chapters.append(self.chapter)
+        else:
+            self.chapter = Chapter(number=int(self.chapter_number), book=self.book)
+            #self.book.chapters.append(self.chapter)
+        # if book != None:
+        #     book.
 
     def get_text_content_new(self):
         text = ""
@@ -71,7 +99,6 @@ class CapitelExtractor:
             text = text.replace(i, '')
         self.text = text
 
-    # TODO implement link to next capitel
     def set_next_chapter_link(self):
         links = self.soup.find_all("a")
         text = ""
@@ -86,18 +113,18 @@ class CapitelExtractor:
         pattern = r"(?P<title>\[.*\].*\n)?(?P<number>\d\d?)(?P<content>\n.*)"
         text = self.text
         compiled = re.compile(pattern)
-        verses = []
+        #verses = []
         while compiled.search(text):
             match = compiled.search(text)
             title = match.group('title')
             if title == None:
                 title = ""
-            number = match.group('number')
+            number = int(match.group('number'))
             content = match.group('content')
-            text = text.replace(title + number + content, '')
-            verse = Verse(number, content, title)
-            verses.append(verse)
-        self.all_verses = verses
+            text = text.replace(title + str(number) + content, '')
+            verse = Verse(number=number, content=content, title=title, chapter=self.chapter)
+            #verses.append(verse)
+        #self.all_verses = verses
 
 
 
@@ -119,13 +146,24 @@ class CapitelExtractor:
 
     # def mark_all_subtitles(self):
     #     subtitle =
-    def get_capitel_title(self):
+    def set_capitel_title(self):
         text = self.soup.find_all("h1")
-        return text[0].string
+        self.whole_title = text[0].string
 
-    # TODO implement get capitel title, book number and book title
     def set_book_meta_data(self):
-        pass
+        print("*****" + self.whole_title + "*****")
+        match = re.search(r"(?P<book_number>\d?)\.?\s?(?P<book_title>.*)\s(?P<chapter_number>\d*)", self.whole_title)
+        self.book_title = match.group('book_title')
+        self.book_number = match.group('book_number')
+        #print(f"book = {self.book_number}")
+        if self.book_number == "":
+            self.book_number = None
+        else:
+            print("book numb " +self.book_number)
+            self.book_number = int(self.book_number)
+        self.chapter_number = match.group('chapter_number')
+        print(f"chapter = {self.chapter_number} booktitle= {self.book_title} chapter_number= {self.chapter_number}")
+        print("************\n")
 
     def convert_to_swiss_german_letters(self):
         self.text = self.text.replace('ß', 'ss')

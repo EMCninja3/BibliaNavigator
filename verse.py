@@ -1,5 +1,8 @@
-class Verse:
-    def __init__(self, number, content, title=""):
-        self.number = number
-        self.title = title
-        self.content = content
+from sqlobject import SQLObject, StringCol, IntCol, ForeignKey
+
+
+class Verse(SQLObject):
+    number = IntCol()
+    content = StringCol()
+    title = StringCol(default=None)
+    chapter = ForeignKey('Chapter')
