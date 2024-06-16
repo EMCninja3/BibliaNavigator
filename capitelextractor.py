@@ -16,28 +16,27 @@ class CapitelExtractor:
     domain = "https://www.bible.com"
     url = None
     book_version = None
+    whole_title = ""
+    next_chapter_link = None
+    text = None
+
+    book_title = ""
+    book_number = 0
+    chapter_number = 0
+    dictionary = dict()
+    chapter = 0
 
     def __init__(self, webpage, url):
         self.webpage = webpage
         self.url = url
+        self.soup = BeautifulSoup(self.webpage.content, 'html.parser')
+        self.text = self.soup.findAll("span")
+        self.set_next_chapter_link()
         if self.check_url_for_intro():
+            #Return if this chapter is an Intro, link to next chapter is already set
              return
         self.set_book_version()
-        self.whole_title = ""
-        self.book_title = ""
-        self.book_number = 0
-        self.chapter_number = 0
-        self.next_chapter_link = ""
-        self.text = ""
-        self.all_verses = []
-        self.dictionary = dict()
-        self.chapter = 0
-        self.soup = BeautifulSoup(self.webpage.content, 'html.parser')
-        # self.soup = BeautifulSoup(self.webpage.content, 'html5lib')
-        #print(self.soup)
-        self.text = self.soup.findAll("span")
-        # for i in self.text:
-        #     print(i.string)
+
         self.get_text_content_new()
         self.convert_to_swiss_german_letters()
         self.text = self.remove_hashtag_comments(self.text)
@@ -49,11 +48,11 @@ class CapitelExtractor:
         self.set_dictionary()
         self.set_book_meta_data()
 
+        #Begin filling database
         self.create_book_and_chapter()
+        self.save_all_verses_in_database()
 
-        self.set_all_verses_from_text()
 
-        self.set_next_chapter_link()
         # print(self.text)
         #print(self.dictionary)
 
@@ -79,7 +78,6 @@ class CapitelExtractor:
         query = Verse.select(AND(Verse.q.chapter == chapter_id, Verse.q.number == int(verse_number)))
         verses = list(query)
         if len(verses) == 1:
-            print(verses[0])
             return verses[0]
         else:
             return None
@@ -90,13 +88,13 @@ class CapitelExtractor:
             self.book = b
             #print(self.book.id)
         if self.book == None:
-            print("insert book")
+            #print("insert book")
             self.book = Book(number=self.book_number, name= self.book_title, version=self.book_version)
             self.chapter = Chapter(number=int(self.chapter_number), book=self.book)
         else:
             chapter = self.get_chapter_with_book_id(self.chapter_number, self.book.id)
             if chapter == None:
-                print("insert chapter")
+                #print("insert chapter")
                 self.chapter = Chapter(number=int(self.chapter_number), book=self.book)
             else:
                 self.chapter = chapter
@@ -146,7 +144,7 @@ class CapitelExtractor:
         link = re.findall(r"/de/bible/.*", text)
         self.next_chapter_link = self.domain + link[-1]
 
-    def set_all_verses_from_text(self):
+    def save_all_verses_in_database(self):
         pattern = r"(?P<title>\[.*\].*\n)?(?P<number>\d\d?)(?P<content>\n.*)"
         text = self.text
         compiled = re.compile(pattern)
@@ -161,7 +159,7 @@ class CapitelExtractor:
             text = text.replace(title + str(number) + content, '')
             verse = self.get_verse_with_chapter_id(number, self.chapter.id)
             if verse == None:
-                print("insert verse")
+                #print("insert verse")
                 Verse(number=number, content=content, title=title, chapter=self.chapter)
             #verses.append(verse)
         #self.all_verses = verses

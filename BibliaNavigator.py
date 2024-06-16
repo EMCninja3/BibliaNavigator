@@ -1,16 +1,13 @@
 import tkinter as tk
 import requests
 from PIL import Image, ImageTk
+
+
 from capitelextractor import CapitelExtractor
 from database import Database
-
+from bibliacrawler import BibliaCrawler
 db = Database()
 db.initialize()
-
-
-
-
-
 
 url0 = "https://www.bible.com/de/bible/149/EXO.INTRO1.RVR1960"
 url1 = 'https://www.bible.com/de/bible/73/GEN.1.HFA'
@@ -20,19 +17,25 @@ url4 = "https://www.bible.com/de/bible/149/GEN.2.RVR1960"
 url5 = "https://www.bible.com/de/bible/149/GEN.3.RVR1960"
 url6 = "https://www.bible.com/de/bible/149/GEN.9.RVR1960"
 url7 = "https://www.bible.com/de/bible/149/2SA.12.RVR1960"
-urls = [url0, url1, url2, url3, url4, url5, url6, url7]
+url8= "https://www.bible.com/de/bible/149/REV.22.RVR1960"
+urls = [url0, url1, url2, url3, url4, url5, url6, url7, url8]
 
-capitel = None
+crawler = BibliaCrawler(url0)
+crawler.crawl()
+
+# capitel = None
 # for url in urls[0:1]:
 #for url in urls[5:6]:
-for url in urls:
-    webpage = requests.get(url, 'html.parser')
-    capitel = CapitelExtractor(webpage, url)
+# title = ""
+# for url in urls[0:]:
+#     webpage = requests.get(url, 'html.parser')
+#     capitel = CapitelExtractor(webpage, url)
+    # print(capitel.next_chapter_link)
     # print(capitel.whole_title)
-verses = capitel.all_verses
 
-for verse in verses:
-    print(verse.title + verse.number + verse.content)
+#chapter_title = capitel.whole_title
+
+#print(capitel.next_chapter_link)
 # for i in range(1, 100):
 #     webpage = requests.get(capitel.next_chapter_link, 'html.parser')
 #     capitel = CapitelExtractor(webpage)
@@ -47,13 +50,14 @@ for verse in verses:
 # capitel = CapitelText(webpage)
 # capitel.get_title()
 
-result = capitel.text
+chapter_title = "Fertig"
+result = "Fertig"
 
 ## Set the widget (GUI)
 root = tk.Tk()
 root.geometry('1280x800')
 # img = ImageTk.PhotoImage(image)
-title = tk.Label(root, text="BibliaNavigator", bg="red", fg="white")
+title = tk.Label(root, text=chapter_title, bg="red", fg="white")
 title.pack()
 # label = tk.Label(root, image=img)
 # lblCapitel = tk.Label(root, text=text, wraplength=500)
