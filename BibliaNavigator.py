@@ -12,7 +12,7 @@ db.initialize()
 
 
 
-
+url0 = "https://www.bible.com/de/bible/149/EXO.INTRO1.RVR1960"
 url1 = 'https://www.bible.com/de/bible/73/GEN.1.HFA'
 url2 = "https://www.bible.com/de/bible/58/GEN.1.ELB71"
 url3 = "https://www.bible.com/de/bible/149/GEN.1.RVR1960"
@@ -20,15 +20,15 @@ url4 = "https://www.bible.com/de/bible/149/GEN.2.RVR1960"
 url5 = "https://www.bible.com/de/bible/149/GEN.3.RVR1960"
 url6 = "https://www.bible.com/de/bible/149/GEN.9.RVR1960"
 url7 = "https://www.bible.com/de/bible/149/2SA.12.RVR1960"
-urls = [url1, url2, url3, url4, url5, url6, url7]
+urls = [url0, url1, url2, url3, url4, url5, url6, url7]
 
 capitel = None
 # for url in urls[0:1]:
 #for url in urls[5:6]:
 for url in urls:
     webpage = requests.get(url, 'html.parser')
-    capitel = CapitelExtractor(webpage)
-    print(capitel.whole_title)
+    capitel = CapitelExtractor(webpage, url)
+    # print(capitel.whole_title)
 verses = capitel.all_verses
 
 for verse in verses:

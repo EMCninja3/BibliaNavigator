@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
+from sqlobject import AND
+
 from book import Book
 from chapter import Chapter
 from database import Database
@@ -11,10 +13,16 @@ from verse import Verse
 class CapitelExtractor:
     book = None
     chapter = None
+    domain = "https://www.bible.com"
+    url = None
+    book_version = None
 
-    def __init__(self, webpage):
-        self.domain = "https://www.bible.com"
+    def __init__(self, webpage, url):
         self.webpage = webpage
+        self.url = url
+        if self.check_url_for_intro():
+             return
+        self.set_book_version()
         self.whole_title = ""
         self.book_title = ""
         self.book_number = 0
@@ -40,7 +48,7 @@ class CapitelExtractor:
         self.set_capitel_title()
         self.set_dictionary()
         self.set_book_meta_data()
-        #self.db = Database()
+
         self.create_book_and_chapter()
 
         self.set_all_verses_from_text()
@@ -49,21 +57,50 @@ class CapitelExtractor:
         # print(self.text)
         #print(self.dictionary)
 
-    def book_exists(self, book_title):
-        return Book.select(Book.q.bookname == book_title)
+    def check_url_for_intro(self):
+        return "INTRO" in self.url
+
+    def set_book_version(self):
+        match = re.search(".*\.(.*)", self.url)
+        self.book_version = match.group(1)
+
+    def book_exists(self, book_title, book_number):
+        return Book.select(AND(Book.q.name == book_title, AND(Book.q.number == book_number, Book.q.version==self.book_version)))
+
+    def get_chapter_with_book_id(self, chapter_number, book_id):
+        query = Chapter.select(AND(Chapter.q.book == book_id, Chapter.q.number == int(chapter_number)))
+        chapters = list(query)
+        if len(chapters) == 1:
+            return chapters[0]
+        else:
+            return None
+
+    def get_verse_with_chapter_id(self, verse_number, chapter_id):
+        query = Verse.select(AND(Verse.q.chapter == chapter_id, Verse.q.number == int(verse_number)))
+        verses = list(query)
+        if len(verses) == 1:
+            print(verses[0])
+            return verses[0]
+        else:
+            return None
 
     def create_book_and_chapter(self):
-        self.book = self.book_exists(self.book_title)
-        print(f"book count  = {self.book.count()}")
-        if self.book.count() == 0:
-            self.book = Book(booknumber=self.book_number, bookname= self.book_title)
+        query = self.book_exists(self.book_title, book_number=self.book_number)
+        for b in list(query):
+            self.book = b
+            #print(self.book.id)
+        if self.book == None:
+            print("insert book")
+            self.book = Book(number=self.book_number, name= self.book_title, version=self.book_version)
             self.chapter = Chapter(number=int(self.chapter_number), book=self.book)
-            #self.book.chapters.append(self.chapter)
         else:
-            self.chapter = Chapter(number=int(self.chapter_number), book=self.book)
-            #self.book.chapters.append(self.chapter)
-        # if book != None:
-        #     book.
+            chapter = self.get_chapter_with_book_id(self.chapter_number, self.book.id)
+            if chapter == None:
+                print("insert chapter")
+                self.chapter = Chapter(number=int(self.chapter_number), book=self.book)
+            else:
+                self.chapter = chapter
+
 
     def get_text_content_new(self):
         text = ""
@@ -122,7 +159,10 @@ class CapitelExtractor:
             number = int(match.group('number'))
             content = match.group('content')
             text = text.replace(title + str(number) + content, '')
-            verse = Verse(number=number, content=content, title=title, chapter=self.chapter)
+            verse = self.get_verse_with_chapter_id(number, self.chapter.id)
+            if verse == None:
+                print("insert verse")
+                Verse(number=number, content=content, title=title, chapter=self.chapter)
             #verses.append(verse)
         #self.all_verses = verses
 
@@ -151,7 +191,8 @@ class CapitelExtractor:
         self.whole_title = text[0].string
 
     def set_book_meta_data(self):
-        print("*****" + self.whole_title + "*****")
+        # print("*****" + self.whole_title + "*****")
+        #print(self.whole_title)
         match = re.search(r"(?P<book_number>\d?)\.?\s?(?P<book_title>.*)\s(?P<chapter_number>\d*)", self.whole_title)
         self.book_title = match.group('book_title')
         self.book_number = match.group('book_number')
@@ -159,11 +200,11 @@ class CapitelExtractor:
         if self.book_number == "":
             self.book_number = None
         else:
-            print("book numb " +self.book_number)
+            # print("book numb " +self.book_number)
             self.book_number = int(self.book_number)
         self.chapter_number = match.group('chapter_number')
-        print(f"chapter = {self.chapter_number} booktitle= {self.book_title} chapter_number= {self.chapter_number}")
-        print("************\n")
+        # print(f"chapter = {self.chapter_number} booktitle= {self.book_title} chapter_number= {self.chapter_number}")
+        # print("************\n")
 
     def convert_to_swiss_german_letters(self):
         self.text = self.text.replace('ß', 'ss')

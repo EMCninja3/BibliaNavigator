@@ -8,6 +8,7 @@ class Book(SQLObject):
     bookname = StringCol()
     chapters = MultipleJoin('Chapter')
     """
-    booknumber = IntCol(default=None)
-    bookname = StringCol()
+    number = IntCol(default=None)
+    name = StringCol()
     chapters = MultipleJoin('Chapter')
+    version = StringCol()
