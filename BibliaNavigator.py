@@ -3,10 +3,14 @@ from tkinter import ttk, font
 
 import requests
 from PIL import Image, ImageTk
+from sqlobject import AND
 
+from book import Book
 from capitelextractor import CapitelExtractor
+from chapter import Chapter
 from database import Database
 from bibliacrawler import BibliaCrawler
+from verse import Verse
 
 db = Database()
 db.initialize()
@@ -22,7 +26,7 @@ url7 = "https://www.bible.com/de/bible/149/2SA.12.RVR1960"
 url8 = "https://www.bible.com/de/bible/149/REV.22.RVR1960"
 urls = [url0, url1, url2, url3, url4, url5, url6, url7, url8]
 
-# crawler = BibliaCrawler(url2)
+# crawler = BibliaCrawler()
 # crawler.crawl()
 
 chapter_title = "Fertig"
@@ -33,7 +37,7 @@ root = tk.Tk()
 root.geometry('1280x800')
 # img = ImageTk.PhotoImage(image)
 frame = ttk.Frame(root)
-frame.grid(row=0, column=0, sticky='nsew')
+frame.grid(row=1, column=0, sticky='nsew')
 
 canvas = tk.Canvas(frame)
 scroll_bar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
@@ -42,187 +46,115 @@ canvas.configure(yscrollcommand=scroll_bar.set)
 content_frame = ttk.Frame(canvas)
 content_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
-text = """Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
-sed diam nonumy eirmod tempor invidunt ut labore et dolore magna 
-aliquyam erat, sed diam voluptua. At vero eos et accusam et justo 
-duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata 
-sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, 
-consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt 
-ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero 
-eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren
-, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum do
-lor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor 
-invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At v
-ero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gube
-rgren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse mole
-stie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros 
-et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril d
-elenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit 
-amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidun
-t ut laoreet dolore magna aliquam erat volutpat.   
-
-Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper susc
-ipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eu
-m iriure dolor in hendrerit in vulputate velit esse molestie consequat, ve
-l illum dolore eu feugiat nulla facilisis at vero eros et accumsan et ius
-to odio dignissim qui blandit praesent luptatum zzril delenit augue duis d
-olore te feugait nulla facilisi.   
-
-Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet d
-oming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet
-, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt 
- laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam
- , quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliqu
- ip ex ea commodo consequat.   
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse moles
-tie consequat, vel illum dolore eu feugiat nulla facilisis.   
-
-At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
- gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lore
- m ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eir
- mod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam vo
- luptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet cl
- ita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit am
- et. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam 
- 
- aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed temp
- or et et invidunt justo labore Stet clita ea et gubergren, kasd magna no 
- rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor s
- it amet. Lorem ipsum dolor sit amet, consetetur
- duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata 
-sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, 
-consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt 
-ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero 
-eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren
-, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum do
-lor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor 
-invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At v
-ero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gube
-rgren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse mole
-stie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros 
-et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril d
-elenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit 
-amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidun
-t ut laoreet dolore magna aliquam erat volutpat.   
-
-Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper susc
-ipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eu
-m iriure dolor in hendrerit in vulputate velit esse molestie consequat, ve
-l illum dolore eu feugiat nulla facilisis at vero eros et accumsan et ius
-to odio dignissim qui blandit praesent luptatum zzril delenit augue duis d
-olore te feugait nulla facilisi.   
-
-Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet d
-oming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet
-, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt 
- laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam
- , quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliqu
- ip ex ea commodo consequat.   
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse moles
-tie consequat, vel illum dolore eu feugiat nulla facilisis.   
-
-At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
- gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lore
- m ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eir
- mod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam vo
- luptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet cl
- ita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit am
- et. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam 
- 
- aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed temp
- or et et invidunt justo labore Stet clita ea et gubergren, kasd magna no 
- rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor s
- it amet. Lorem ipsum dolor sit amet, consetetur
- duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata 
-sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, 
-consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt 
-ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero 
-eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren
-, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum do
-lor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor 
-invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At v
-ero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gube
-rgren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse mole
-stie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros 
-et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril d
-elenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit 
-amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidun
-t ut laoreet dolore magna aliquam erat volutpat.   
-
-Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper susc
-ipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eu
-m iriure dolor in hendrerit in vulputate velit esse molestie consequat, ve
-l illum dolore eu feugiat nulla facilisis at vero eros et accumsan et ius
-to odio dignissim qui blandit praesent luptatum zzril delenit augue duis d
-olore te feugait nulla facilisi.   
-
-Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet d
-oming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet
-, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt 
- laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam
- , quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliqu
- ip ex ea commodo consequat.   
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse moles
-tie consequat, vel illum dolore eu feugiat nulla facilisis.   
-
-At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
- gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lore
- m ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eir
- mod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam vo
- luptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet cl
- ita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit am
- et. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam 
- 
- aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed temp
- or et et invidunt justo labore Stet clita ea et gubergren, kasd magna no 
- rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor s
- it amet. Lorem ipsum dolor sit amet, consetetur"""
-font_size = 84
+font_size = 34
 custom_font = font.Font(family='Helvetica', size=font_size)
-label = ttk.Label(content_frame, text=text, font=custom_font , wraplength=1000)
+label = ttk.Label(content_frame, text="", font=custom_font , wraplength=1000)
 label.grid(row=0, column=0, pady=5)
 
+
+search_frame = ttk.Frame(root)
+search_frame.grid(row=0, column=0, sticky='ew', pady=10)
+search_label = ttk.Label(search_frame, text="Search")
+search_label.grid(row=0, column=0, pady=5)
+search_entry = ttk.Entry(search_frame, width=50)
+search_entry.grid(row=0, column=1, pady=5)
+search_button = ttk.Button(search_frame, text="Suchen", command=lambda: search_chapter(search_entry.get()))
+search_button.grid(row=0, column=2, pady=5)
+
 root.columnconfigure(0, weight=1)
-root.rowconfigure(0, weight=1)
+root.rowconfigure(1, weight=1)
 frame.columnconfigure(0, weight=1)
 frame.rowconfigure(0, weight=1)
 
 canvas.create_window((0, 0), window=content_frame, anchor='nw')
 canvas.grid(row=0, column=0, sticky='nsew')
 scroll_bar.grid(row=0, column=1, sticky='ns')
-
+default_color = canvas.cget("background")
 
 def _on_mousewheel(event):
-    print(event.delta)
     canvas.yview_scroll(int(-1 * (event.delta*4 /3)), 'units')
 
 def _on_keydown(event):
     global font_size, label
-    print(font_size)
+    print(event.keysym)
     if event.keysym == 'Up':
         font_size += 1
     elif event.keysym == 'Down':
         font_size -= 1
-
+    elif event.keysym == 'Return':
+        search_chapter(search_entry.get())
     custom_font = font.Font(family='Helvetica', size=font_size)
     label.configure(font=custom_font)
     label.update_idletasks()
-    #label.config(scrollregion=canvas.bbox("all"))
-    print(event.keysym)
+    canvas.config(scrollregion=canvas.bbox("all"))
 
+def _on_hover(label):
+    label.bind("<Enter>", func=lambda e: label.config(background="blue"))
+    label.bind("<Leave>", func=lambda e: label.config(background=default_color))
+tk.Label()
 
 
 canvas.bind_all("<MouseWheel>", _on_mousewheel)
 canvas.bind_all("<KeyPress>", _on_keydown)
+
+last_widgets = list()
+def search_chapter(search_query):
+    global last_widgets
+    try:
+        label.config(text="")
+        for l in last_widgets:
+            l.destroy()
+        last_widgets = list()
+        search = search_query.split()
+        book_name, chapter_number, book_number = None, None, None
+        if(len(search) == 2):
+            book_name, chapter_number = search
+        else:
+            book_number, book_name, chapter_number = search
+            book_number = int(book_number)
+        #book_name, chapter_number = search_query.split()
+        chapter_number = int(chapter_number)
+        book = Book.select(AND(Book.q.name == book_name, AND(Book.q.version =="ELB71", Book.q.number== book_number))).getOne(None)
+        if book:
+            chapter = Chapter.select(AND(Chapter.q.book == book.id, Chapter.q.number == chapter_number)).getOne(None)
+            if chapter:
+                verses = Verse.select(Verse.q.chapter == chapter.id)
+                text = '\n'.join([f"{verse.number}. {remove_newline(verse.content)}" for verse in verses])
+                i = 1
+                print(f"verses = {verses.count()}")
+                for verse in verses:
+                    l2 = None
+                    if verse.title != "":
+                        cfont = font.Font(family='Helvetica', size=font_size, weight="bold")
+                        text = verse.title
+                        text = text.replace("[", "")
+                        text = text.replace("]", "")
+                        l2 = tk.Label(content_frame, text=text, font=cfont)
+                        l2.grid(row=i, column=0)
+                    i += 1
+                    l1 = tk.Label(content_frame, text=verse.number, font=custom_font)
+                    l1.grid(row=i, column=0)
+                    i += 1
+                    l = tk.Label(content_frame, text=verse.content, font=custom_font, wraplength=1000)
+                    l.grid(row=i, column=0)
+                    if l2:
+                        last_widgets.append(l2)
+                    last_widgets.append(l1)
+                    last_widgets.append(l)
+                    i+=1
+                #label. config(text=text)
+            else:
+                label.config(text="Chapter not found.")
+        else:
+            label.config(text="Book not found.")
+    except Exception as e:
+        print(e)
+        label.config(text=f"Error: {str(e)}")
+    for l in last_widgets:
+        _on_hover(l)
+
+def remove_newline(text=""):
+    return text.replace("\n", "")
 
 # tk.Label(root, text="Suche Kapitel").grid(row=0)
 # entry = tk.Entry(root)
