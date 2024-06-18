@@ -48,8 +48,8 @@ content_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas
 
 font_size = 34
 custom_font = font.Font(family='Helvetica', size=font_size)
-label = ttk.Label(content_frame, text="", font=custom_font , wraplength=1000)
-label.grid(row=0, column=0, pady=5)
+# label = ttk.Label(content_frame, text="", font=custom_font , wraplength=1000)
+# label.grid(row=0, column=0, pady=5)
 
 
 search_frame = ttk.Frame(root)
@@ -84,8 +84,11 @@ def _on_keydown(event):
     elif event.keysym == 'Return':
         search_chapter(search_entry.get())
     custom_font = font.Font(family='Helvetica', size=font_size)
-    label.configure(font=custom_font)
-    label.update_idletasks()
+    # label.configure(font=custom_font)
+    # label.update_idletasks()
+    for l in last_widgets:
+        l.configure(font=custom_font)
+        l.update_idletasks()
     canvas.config(scrollregion=canvas.bbox("all"))
 
 def _on_hover(label):
@@ -101,7 +104,7 @@ last_widgets = list()
 def search_chapter(search_query):
     global last_widgets
     try:
-        label.config(text="")
+        # label.config(text="")
         for l in last_widgets:
             l.destroy()
         last_widgets = list()
@@ -144,12 +147,14 @@ def search_chapter(search_query):
                     i+=1
                 #label. config(text=text)
             else:
-                label.config(text="Chapter not found.")
+                print("Chapter not found.")
+                # label.config(text="Chapter not found.")
         else:
-            label.config(text="Book not found.")
+            print("Book not found.")
+            # label.config(text="Book not found.")
     except Exception as e:
         print(e)
-        label.config(text=f"Error: {str(e)}")
+        # label.config(text=f"Error: {str(e)}")
     for l in last_widgets:
         _on_hover(l)
 
