@@ -12,6 +12,7 @@ Me imagino un amigo asi:
 - que siempre te es fiel,
 - que te completa,
 - que te entiende,
+- que esta siempre de tu lado,
 - que conoce tu corazon y loq que tu puedes, ser mejor que tu mismo. pues aun no esta la palabra en tu lengua y he aqui tu la sabes....
 - que quiere que te esfuerzes y confies en el,
 - que te ama incondicional,
