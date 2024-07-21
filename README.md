@@ -1,4 +1,5 @@
-# BibliaNavigator
+# escribe, lee la biblia y escribe!
+## BibliaNavigator
 Application for displaying and control the Bible to the Screen(Beamer)
 
 
